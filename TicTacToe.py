@@ -1,5 +1,6 @@
 import random
 import math
+import time
 
 board = ['', 1, 2, 3, 4, 5, 6, 7, 8, 9]
 WIN_COMBINATIONS = [
@@ -14,7 +15,12 @@ WIN_COMBINATIONS = [
     ]
 
 move_count = 1
-scores = {'X': -10, 'O': 10, 'Tie': 0}
+def get_score(letter, player):
+    if player == 'X':
+        scores = {'X': 10, 'O': -10, 'Tie': 0}
+    else:
+        scores = {'X': -10, 'O': 10, 'Tie': 0}
+    return scores[letter]
 
 
 def instructions():
@@ -66,7 +72,8 @@ def get_empty_spaces():
 def minimax(board, depth, is_maximazing, what_letter):
     result = is_game_over()
     if result is not None:
-        return (scores[result])
+        score = get_score(result, what_letter)
+        return score
 
     if is_maximazing:
         best_score = -math.inf
