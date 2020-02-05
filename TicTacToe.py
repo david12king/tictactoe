@@ -137,7 +137,10 @@ def get_player_letters(first_p, second_p):
 
 def get_player_turns():
     turn = random.randint(1, 2)
-    print(f'you will be {turn}')
+    if turn == 1:
+        print(f'you will be {turn}st')
+    else:
+        print(f'you will be {turn}nd')
     if turn == 1:
         return 'human', 'comp'
     else:
