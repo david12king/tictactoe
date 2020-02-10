@@ -69,7 +69,7 @@ def get_empty_spaces():
     return empty_spaces
 
 
-def minimax(board, depth, is_maximazing, what_letter):
+def minimax(board, depth, is_maximazing, what_letter, alpha, betha):
     result = is_game_over()
     if result is not None:
         score = get_score(result, what_letter)
@@ -80,8 +80,11 @@ def minimax(board, depth, is_maximazing, what_letter):
         empty_spaces = get_empty_spaces()
         for i in empty_spaces:
             board[i] = what_letter
-            score = minimax(board, depth + 1, False, what_letter)
+            score = minimax(board, depth + 1, False, what_letter, alpha, betha)
             board[i] = '_'
+            alpha = max(alpha, score)
+            if alpha >= betha:
+                break
             best_score = max(score, best_score)
         return best_score
     else:
@@ -93,8 +96,11 @@ def minimax(board, depth, is_maximazing, what_letter):
         empty_spaces = get_empty_spaces()
         for i in empty_spaces:
             board[i] = opposite_letter
-            score = minimax(board, depth + 1, True, what_letter)
+            score = minimax(board, depth + 1, True, what_letter, alpha, betha)
             board[i] = '_'
+            betha = min(betha, score)
+            if alpha >= betha:
+                break
             best_score = min(score, best_score)
         return best_score
 
@@ -105,7 +111,7 @@ def get_comp_move(what_turn, what_letter):
     empty_spaces = get_empty_spaces()
     for i in empty_spaces:
         board[i] = what_letter
-        score = minimax(board, 0, False, what_letter)
+        score = minimax(board, 0, False, what_letter, -math.inf, math.inf)
         board[i] = '_'
         if score > best_score:
             best_score = score
