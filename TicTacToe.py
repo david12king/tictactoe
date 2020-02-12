@@ -60,7 +60,6 @@ def clear_board():
     for i in range(1, 10):
         board[i] = '_'
 
-
 def get_empty_spaces():
     empty_spaces = []
     for i in range(1, len(board)):
@@ -69,7 +68,7 @@ def get_empty_spaces():
     return empty_spaces
 
 
-def minimax(board, depth, is_maximazing, what_letter, alpha, betha):
+def minimax(board, depth, is_maximazing, what_letter, alpha, beta):
     result = is_game_over()
     if result is not None:
         score = get_score(result, what_letter)
@@ -80,38 +79,40 @@ def minimax(board, depth, is_maximazing, what_letter, alpha, betha):
         empty_spaces = get_empty_spaces()
         for i in empty_spaces:
             board[i] = what_letter
-            score = minimax(board, depth + 1, False, what_letter, alpha, betha)
+            score = max(score, minimax(board, depth + 1, False, what_letter, alpha, beta))
             board[i] = '_'
             alpha = max(alpha, score)
-            if alpha >= betha:
+            if alpha >= beta:
                 break
         return score
     else:
+        score = math.inf
         if what_letter == 'X':
             opposite_letter = 'O'
         else:
             opposite_letter = 'X'
-        score = math.inf
         empty_spaces = get_empty_spaces()
         for i in empty_spaces:
             board[i] = opposite_letter
-            score = minimax(board, depth + 1, True, what_letter, alpha, betha)
+            score = min(score, minimax(board, depth + 1, True, what_letter, alpha, beta))
             board[i] = '_'
-            betha = min(betha, score)
-            if alpha >= betha:
+            beta = min(beta, score)
+            if alpha >= beta:
                 break
         return score
 
 
 def get_comp_move(what_turn, what_letter):
-    score = -math.inf
+    score = 0
     move = 0
+    alpha = 0
+    beta = 0
     empty_spaces = get_empty_spaces()
     for i in empty_spaces:
         board[i] = what_letter
         score = minimax(board, 0, False, what_letter, -math.inf, math.inf)
         board[i] = '_'
-        if alpha >= betha:
+        if alpha >= beta:
             move = i
     return move
 
