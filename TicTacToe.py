@@ -69,7 +69,6 @@ def clear_board():
     for i in range(1, 10):
         board[i] = '_'
 
-
 def get_empty_spaces():
     empty_spaces = []
     for i in range(1, len(board)):
@@ -85,7 +84,7 @@ def minimax(board, depth, is_maximazing, what_letter, alpha, beta):
         return score
 
     if is_maximazing:
-        best_score = -math.inf
+        score = -math.inf
         empty_spaces = get_empty_spaces()
         for i in empty_spaces:
             board[i] = what_letter
@@ -96,11 +95,11 @@ def minimax(board, depth, is_maximazing, what_letter, alpha, beta):
                 break
         return best_score
     else:
+        score = math.inf
         if what_letter == 'X':
             opposite_letter = 'O'
         else:
             opposite_letter = 'X'
-        best_score = math.inf
         empty_spaces = get_empty_spaces()
         for i in empty_spaces:
             board[i] = opposite_letter
@@ -115,13 +114,14 @@ def get_comp_move(what_turn, what_letter):
     beta = math.inf
     best_score = -math.inf
     move = 0
+    alpha = 0
+    beta = 0
     empty_spaces = get_empty_spaces()
     for i in empty_spaces:
         board[i] = what_letter
         score = minimax(board, 0, False, what_letter, alpha, beta)
         board[i] = '_'
-        if score > best_score:
-            best_score = score
+        if alpha >= beta:
             move = i
     return move
 
