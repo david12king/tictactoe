@@ -7,3 +7,5 @@
 __pycache__/TicTacToe.cpython-38.pyc
 .idea/TicTacToe.iml
 .idea/.gitignore
+.vscode/launch.json
+.vscode/settings.json
