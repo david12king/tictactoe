@@ -10,13 +10,12 @@ SCREEN_HEIGHT = 720
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
-global FIRST_P_LETTER
-global SECOND_P_LETTER
-global FIRST_P
-global SECOND_P
-global PLAYING
-global INTRO
-global board
+FIRST_P_LETTER = None
+SECOND_P_LETTER = None
+FIRST_P = None
+SECOND_P = None
+PLAYING = None
+INTRO = None
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
@@ -25,6 +24,7 @@ clock.tick(60)
 all_sprites = pygame.sprite.Group()
 
 board = ['', '_', '_', '_', '_', '_', '_', '_', '_', '_']
+
 WIN_COMBINATIONS = [
     # Horizontal
     (1, 2, 3),
@@ -73,22 +73,23 @@ def print_board():
 
 def get_next_move(sprites):
     empty_spaces = get_empty_spaces()
-    while True:
-        try:
-            pos = pygame.mouse.get_pos()
-            for i in sprites:
-                if i.rect.collidepoint(pos):
-                    next_move = i.value
-            if 0 < next_move <= 9:
-                if next_move in empty_spaces:
-                    return next_move
+    next = True
+    next_move = 0
+    while next:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+                for i in sprites:
+                    if i.rect.collidepoint(pos):
+                        next_move = i.value
+                        next = False
+                if 0 < next_move <= 9:
+                    if next_move in empty_spaces:
+                        return next_move
+                    else:
+                        continue
                 else:
                     continue
-            else:
-                continue
-        except:
-            print('That is not a valid number')
-            continue
 
 
 def clear_board():
@@ -220,7 +221,6 @@ def intro():
         global FIRST_P_LETTER
         global SECOND_P_LETTER
         global PLAYING
-
         pos = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -241,9 +241,11 @@ def intro():
                     if FIRST_P == 'comp':
                         FIRST_P_LETTER = 'O'
                         SECOND_P_LETTER = 'X'
+                        print(f'the first player is: {FIRST_P} and you selected {SECOND_P_LETTER}')
                     else:
                         FIRST_P_LETTER = 'X'
                         SECOND_P_LETTER = 'O'
+                        print(f'the first player is: {FIRST_P} and you selected {FIRST_P_LETTER}')
                 # O is selected
                 if 670 < pos[0] < 670 + letter_o.get_width() and 250 < pos[1] < 670 + letter_o.get_height():
                     letter_o = letter_font.render('O', True, (255, 255, 255))
@@ -251,9 +253,11 @@ def intro():
                     if FIRST_P == 'comp':
                         FIRST_P_LETTER = 'X'
                         SECOND_P_LETTER = 'O'
+                        print(f'the first player is: {FIRST_P} and you selected {SECOND_P_LETTER}')
                     else:
                         FIRST_P_LETTER = 'O'
                         SECOND_P_LETTER = 'X'
+                        print(f'the first player is: {FIRST_P} and you selected {FIRST_P_LETTER}')
                 try:
                     if button.highlighted and FIRST_P_LETTER is not None:
                         intro_running = False
@@ -319,14 +323,14 @@ class CreateText:
         self.x = x
         self.y = y
         self.font_name = font_name
-        self.button_font = pygame.font.SysFont(font_name, 30)
-        self.button_text = self.button_font.render(self.text, True, self.color)
+        self.font = pygame.font.SysFont(font_name, 100)
+        self.text_to_screen = self.font.render(self.text, True, self.color)
 
     def update(self):
         pass
 
     def draw(self):
-        screen.blit(self.button_text, (self.x, self.y))
+        screen.blit(self.text_to_screen, (self.x, self.y))
 
 
 class ScreenBoard:
@@ -346,18 +350,12 @@ class ScreenBoard:
                 y = 25 + 175 * column
                 self.cell.rect.topleft = (y, x)
                 all_sprites.add(self.cell)
-        for i in all_sprites:
-            print(i.value)
-            print(i.rect.center)
-            print(i.rect.x)
-            print(i.rect.y)
 
     def draw_board(self):
         sprite_list = all_sprites.sprites()
         for i in range(1, 10):
             if board[i] == 'X':
-                self.text = CreateText(sprite_list[i-1].rect.x, sprite_list[i-1].rect.y, board[i], BLACK, 50,
-                                       'comicsansms')
+                self.text = CreateText(sprite_list[i-1].rect.x, sprite_list[i-1].rect.y, board[i], BLACK, 50, 'comicsansms')
                 self.text.draw()
             elif board[i] == 'O':
                 self.text = CreateText(sprite_list[i-1].rect.x, sprite_list[i-1].rect.y, board[i], BLACK, 50, 'comicsansms')
@@ -367,6 +365,10 @@ class ScreenBoard:
 def game():
     global PLAYING
     global board
+    global FIRST_P
+    global FIRST_P_LETTER
+    global SECOND_P
+    global SECOND_P_LETTER
     move_count = 1
     s_board = ScreenBoard()
     s_board.create_screen_board()
@@ -386,27 +388,25 @@ def game():
         else:
             if FIRST_P == 'human' and move_count % 2 != 0:
                 add_move_to_board(get_next_move(sprite_list), FIRST_P_LETTER)
-                s_board.draw_board()
                 move_count += 1
             elif FIRST_P == 'human' and move_count % 2 == 0:
-                add_move_to_board(get_comp_move(SECOND_P, FIRST_P_LETTER), FIRST_P_LETTER)
-                s_board.draw_board()
+                add_move_to_board(get_comp_move(SECOND_P, SECOND_P_LETTER), SECOND_P_LETTER)
                 move_count += 1
+                pygame.time.wait(500)
             elif FIRST_P == 'comp' and move_count % 2 != 0:
                 add_move_to_board(get_comp_move(FIRST_P, FIRST_P_LETTER), FIRST_P_LETTER)
-                s_board.draw_board()
                 move_count += 1
+                pygame.time.wait(500)
             else:
-                add_move_to_board(get_next_move(sprite_list), FIRST_P_LETTER)
-                s_board.draw_board()
+                add_move_to_board(get_next_move(sprite_list), SECOND_P_LETTER)
                 move_count += 1
         # Update
         all_sprites.update()
 
         # Draw
-
         screen.fill((0, 0, 0))
         all_sprites.draw(screen)
+        s_board.draw_board()
         pygame.display.update()
 
 
